@@ -15,7 +15,7 @@ const getSpecificProperty = async (req,res) =>{
     const propertyId = req.params.id
 
     const property = await Property.findById(propertyId)
-    if (!propertyId){
+    if (!property){
       return res.status(404).json({message : "Property not found."})
     }
 
