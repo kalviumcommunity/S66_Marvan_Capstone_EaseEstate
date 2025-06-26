@@ -1,5 +1,5 @@
 const Property = require("../models/property");
-const User = require("../models/user")
+const User = require("../models/property")
 
 const getAllProperties = async (req, res) => {
   try {
@@ -9,6 +9,21 @@ const getAllProperties = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+const getSpecificProperty = async (req,res) =>{
+  try{
+    const propertyId = req.params.id
+
+    const property = await Property.findById(propertyId)
+    if (!property){
+      return res.status(404).json({message : "Property not found."})
+    }
+
+    res.status(200).json(property)
+  }catch(err){
+    res.status(500).json({error : err.message})
+  }
+}
 
 const addProperty = async (req, res) => {
   try {
@@ -51,4 +66,4 @@ const deleteProperty = async (req, res) => {
 };
 
 
-module.exports = {getAllProperties, addProperty, updateProperty, deleteProperty};
+module.exports = {getAllProperties, addProperty, updateProperty, deleteProperty , getSpecificProperty};

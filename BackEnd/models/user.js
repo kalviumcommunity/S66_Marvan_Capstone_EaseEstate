@@ -23,7 +23,7 @@ const userSchema = new mongoose.Schema({
       ref: 'Property'
     } 
   ]
-  
+
 });
 
 module.exports = mongoose.model('User', userSchema);
