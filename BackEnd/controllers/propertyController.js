@@ -10,6 +10,21 @@ const getAllProperties = async (req, res) => {
   }
 };
 
+const getSpecificProperty = async (req,res) =>{
+  try{
+    const propertyId = req.params.id
+
+    const property = await Property.findById(propertyId)
+    if (!property){
+      return res.status(404).json({message : "Property not found."})
+    }
+
+    res.status(200).json(property)
+  }catch(err){
+    res.status(500).json({error : err.message})
+  }
+}
+
 const addProperty = async (req, res) => {
   try {
     const newProperty = new Property(req.body);
@@ -53,4 +68,4 @@ const deleteProperty = async (req, res) => {
 };
 
 
-module.exports = {getAllProperties, addProperty, updateProperty, deleteProperty};
+module.exports = {getAllProperties, addProperty, updateProperty, deleteProperty , getSpecificProperty};
