@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Home, MapPin, IndianRupee, Image, FileText } from 'lucide-react';
 import { propertyAPI } from '../services/api';

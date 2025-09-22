@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Plus,
@@ -24,11 +24,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    fetchUserProperties();
-  }, []);
-
-  const fetchUserProperties = async () => {
+  const fetchUserProperties = useCallback(async () => {
     try {
       setLoading(true);
       // For now, we'll fetch all properties and filter by owner
@@ -45,7 +41,11 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id]);
+
+  useEffect(() => {
+    fetchUserProperties();
+  }, [fetchUserProperties]);
 
   const handleDeleteProperty = async (propertyId) => {
     if (window.confirm('Are you sure you want to delete this property?')) {

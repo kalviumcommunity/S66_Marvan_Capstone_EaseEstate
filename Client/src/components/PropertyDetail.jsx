@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -30,11 +30,7 @@ const PropertyDetail = () => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [showContactForm, setShowContactForm] = useState(false);
 
-  useEffect(() => {
-    fetchProperty();
-  }, [id]);
-
-  const fetchProperty = async () => {
+  const fetchProperty = useCallback(async () => {
     try {
       setLoading(true);
       const response = await propertyAPI.getPropertyById(id);
@@ -45,7 +41,11 @@ const PropertyDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    fetchProperty();
+  }, [fetchProperty]);
 
   const handleBuyNow = () => {
     // TODO: Implement Razorpay integration
