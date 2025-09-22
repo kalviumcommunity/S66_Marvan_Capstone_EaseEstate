@@ -72,6 +72,13 @@ export const propertyAPI = {
       return axios.delete(`${API_BASE_URL}/property/${id}`);
     }
     return mockPropertyAPI.deleteProperty(id);
+  },
+
+  getUserProperties: async (userId) => {
+    if (await isBackendAvailable()) {
+      return axios.get(`${API_BASE_URL}/users/${userId}/properties`);
+    }
+    return mockPropertyAPI.getUserProperties(userId);
   }
 };
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Search, Filter, MapPin, SlidersHorizontal } from 'lucide-react';
 import { propertyAPI } from '../services/api';
@@ -6,7 +6,7 @@ import PropertyCard from './PropertyCard';
 import Button from './ui/Button';
 import Input from './ui/Input';
 
-const PropertyList = () => {
+const PropertyList = forwardRef((props, ref) => {
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -37,6 +37,11 @@ const PropertyList = () => {
     }
   };
 
+  // Expose refresh function to parent components
+  useImperativeHandle(ref, () => ({
+    refreshProperties: fetchProperties
+  }));
+
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -44,6 +49,10 @@ const PropertyList = () => {
     } else {
       setSearchParams({});
     }
+  };
+
+  const handlePropertyDelete = (deletedPropertyId) => {
+    setProperties(prev => prev.filter(property => property._id !== deletedPropertyId));
   };
 
   const filteredProperties = properties.filter(property => {
@@ -192,6 +201,7 @@ const PropertyList = () => {
               <PropertyCard
                 key={property._id}
                 property={property}
+                onDelete={handlePropertyDelete}
               />
             ))}
           </div>
@@ -199,6 +209,8 @@ const PropertyList = () => {
       </div>
     </div>
   );
-};
+});
+
+PropertyList.displayName = 'PropertyList';
 
 export default PropertyList;

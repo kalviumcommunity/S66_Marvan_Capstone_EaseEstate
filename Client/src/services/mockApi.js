@@ -149,5 +149,11 @@ export const mockPropertyAPI = {
     }
     mockProperties.splice(index, 1);
     return { data: { message: 'Property deleted successfully' } };
+  },
+
+  getUserProperties: async (userId) => {
+    await delay(500);
+    const userProperties = mockProperties.filter(p => p.owner === userId);
+    return { data: userProperties };
   }
 };

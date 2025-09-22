@@ -40,29 +40,44 @@ const HomePage = () => {
       {/* Hero Section */}
       <div className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white">
         <div className="absolute inset-0 bg-black bg-opacity-20"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              Find Your Dream
-              <span className="block text-yellow-300">Property</span>
-            </h1>
-            <p className="text-xl md:text-2xl text-blue-100 mb-8 max-w-3xl mx-auto">
-              Discover amazing properties across India. From luxury apartments to cozy homes,
-              find the perfect place to call your own.
-            </p>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Left Column - Text Content */}
+            <div className="text-left">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
+                Find Your Dream
+                <span className="block text-yellow-300">Property</span>
+              </h1>
+              <p className="text-lg md:text-xl text-blue-100 mb-8 max-w-2xl">
+                Discover amazing properties across India. From luxury apartments to cozy homes,
+                find the perfect place to call your own.
+              </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/properties">
-                <Button size="lg" className="w-full sm:w-auto">
-                  <Search className="w-5 h-5 mr-2" />
-                  Browse Properties
-                </Button>
-              </Link>
-              <Link to="/signup">
-                <Button variant="outline" size="lg" className="w-full sm:w-auto border-white text-white hover:bg-white hover:text-blue-600">
-                  List Your Property
-                </Button>
-              </Link>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link to="/properties">
+                  <Button size="lg" className="w-full sm:w-auto shadow-lg">
+                    <Search className="w-5 h-5 mr-2" />
+                    Browse Properties
+                  </Button>
+                </Link>
+                <Link to="/signup">
+                  <Button variant="outline" size="lg" className="w-full sm:w-auto border-white text-white hover:bg-white hover:text-blue-600 bg-transparent shadow-lg">
+                    List Your Property
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Right Column - Property Image */}
+            <div className="relative">
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+                <img
+                  src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                  alt="Modern luxury apartment building"
+                  className="w-full h-96 lg:h-[500px] object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -128,13 +143,13 @@ const HomePage = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/properties">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-blue-600">
+              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-blue-600 bg-transparent">
                 Start Your Search
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </Link>
             <Link to="/signup">
-              <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100">
+              <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 shadow-lg">
                 Create Account
               </Button>
             </Link>

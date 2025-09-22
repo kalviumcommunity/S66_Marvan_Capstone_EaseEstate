@@ -1,10 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Bed, Bath, Square, Heart } from 'lucide-react';
+import { MapPin, Bed, Bath, Square, Heart, Trash2 } from 'lucide-react';
 import { formatPrice } from '../utils';
 import { Card, CardContent } from './ui/Card';
+import { useAuth } from '../contexts/AuthContext';
+import { propertyAPI } from '../services/api';
 
-const PropertyCard = ({ property, onFavoriteToggle, isFavorite = false }) => {
+const PropertyCard = ({ property, onFavoriteToggle, isFavorite = false, onDelete }) => {
+  const { user } = useAuth();
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
   const {
     _id,
     title,
@@ -16,8 +21,37 @@ const PropertyCard = ({ property, onFavoriteToggle, isFavorite = false }) => {
     description,
     bedrooms = 0,
     bathrooms = 0,
-    area = 0
+    area = 0,
+    owner
   } = property;
+
+  const isOwner = user && owner === user._id;
+
+  const handleDelete = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!isOwner) return;
+
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${title}"? This action cannot be undone.`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setDeleteLoading(true);
+      await propertyAPI.deleteProperty(_id);
+      if (onDelete) {
+        onDelete(_id);
+      }
+    } catch (error) {
+      console.error('Error deleting property:', error);
+      alert('Failed to delete property. Please try again.');
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
 
   return (
     <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 group">
@@ -29,14 +63,26 @@ const PropertyCard = ({ property, onFavoriteToggle, isFavorite = false }) => {
             className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
           />
         </Link>
-        <button
-          onClick={() => onFavoriteToggle && onFavoriteToggle(_id)}
-          className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow"
-        >
-          <Heart
-            className={`w-5 h-5 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'}`}
-          />
-        </button>
+        <div className="absolute top-3 right-3 flex gap-2">
+          <button
+            onClick={() => onFavoriteToggle && onFavoriteToggle(_id)}
+            className="p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow"
+          >
+            <Heart
+              className={`w-5 h-5 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'}`}
+            />
+          </button>
+          {isOwner && (
+            <button
+              onClick={handleDelete}
+              disabled={deleteLoading}
+              className="p-2 bg-red-600 text-white rounded-full shadow-md hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Delete Property"
+            >
+              <Trash2 className="w-5 h-5" />
+            </button>
+          )}
+        </div>
         <div className="absolute top-3 left-3">
           <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium">
             For Sale
