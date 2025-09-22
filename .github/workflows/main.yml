@@ -47,11 +47,6 @@ jobs:
         run: npm install
         working-directory: ./BackEnd
 
-      # If you have ESLint for backend, uncomment this:
-      # - name: Run lint (BackEnd)
-      #   run: npm run lint
+      # - name: Run tests (BackEnd)
+      #   run: npm test
       #   working-directory: ./BackEnd
-
-      - name: Run tests (BackEnd)
-        run: npm test
-        working-directory: ./BackEnd
