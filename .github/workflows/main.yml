@@ -1,4 +1,4 @@
-name: CI
+name: Fullstack CI
 
 on:
   push:
@@ -7,20 +7,51 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  frontend:
+    name: Frontend Build
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repo
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20
 
-      - name: Install dependencies
+      - name: Install dependencies (client)
         run: npm install
+        working-directory: ./client
 
-      - name: Run tests
+      - name: Run lint (client)
+        run: npm run lint
+        working-directory: ./client
+
+      - name: Build project (client)
+        run: npm run build
+        working-directory: ./client
+
+  backend:
+    name: Backend Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install dependencies (backend)
+        run: npm install
+        working-directory: ./backend
+
+      # Optional: add linting if you set up ESLint for backend
+      # - name: Run lint (backend)
+      #   run: npm run lint
+      #   working-directory: ./backend
+
+      - name: Run tests (backend)
         run: npm test
+        working-directory: ./backend
