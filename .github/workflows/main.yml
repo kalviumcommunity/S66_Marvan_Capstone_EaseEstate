@@ -19,17 +19,17 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install dependencies (client)
+      - name: Install dependencies (Client)
         run: npm install
-        working-directory: ./client
+        working-directory: ./Client
 
-      - name: Run lint (client)
+      - name: Run lint (Client)
         run: npm run lint
-        working-directory: ./client
+        working-directory: ./Client
 
-      - name: Build project (client)
+      - name: Build project (Client)
         run: npm run build
-        working-directory: ./client
+        working-directory: ./Client
 
   backend:
     name: Backend Build & Test
@@ -43,15 +43,15 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install dependencies (backend)
+      - name: Install dependencies (BackEnd)
         run: npm install
-        working-directory: ./backend
+        working-directory: ./BackEnd
 
-      # Optional: add linting if you set up ESLint for backend
-      # - name: Run lint (backend)
+      # If you have ESLint for backend, uncomment this:
+      # - name: Run lint (BackEnd)
       #   run: npm run lint
-      #   working-directory: ./backend
+      #   working-directory: ./BackEnd
 
-      - name: Run tests (backend)
+      - name: Run tests (BackEnd)
         run: npm test
-        working-directory: ./backend
+        working-directory: ./BackEnd
