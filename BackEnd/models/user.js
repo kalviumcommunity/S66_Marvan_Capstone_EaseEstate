@@ -21,7 +21,21 @@ const userSchema = new mongoose.Schema({
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Property'
-    } 
+    }
+  ],
+
+  favorites: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Property'
+    }
+  ],
+
+  wishlist: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Property'
+    }
   ]
   
 });
