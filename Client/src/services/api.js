@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { mockAuthAPI, mockPropertyAPI } from './mockApi';
 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = 'http://localhost:3000';
 
 // Check if backend is available
 const isBackendAvailable = async () => {
@@ -79,6 +79,50 @@ export const propertyAPI = {
       return axios.get(`${API_BASE_URL}/users/${userId}/properties`);
     }
     return mockPropertyAPI.getUserProperties(userId);
+  },
+
+  // Favorites API calls
+  addToFavorites: async (userId, propertyId) => {
+    if (await isBackendAvailable()) {
+      return axios.post(`${API_BASE_URL}/users/${userId}/favorites/${propertyId}`);
+    }
+    return mockPropertyAPI.addToFavorites(userId, propertyId);
+  },
+
+  removeFromFavorites: async (userId, propertyId) => {
+    if (await isBackendAvailable()) {
+      return axios.delete(`${API_BASE_URL}/users/${userId}/favorites/${propertyId}`);
+    }
+    return mockPropertyAPI.removeFromFavorites(userId, propertyId);
+  },
+
+  getUserFavorites: async (userId) => {
+    if (await isBackendAvailable()) {
+      return axios.get(`${API_BASE_URL}/users/${userId}/favorites`);
+    }
+    return mockPropertyAPI.getUserFavorites(userId);
+  },
+
+  // Wishlist API calls
+  addToWishlist: async (userId, propertyId) => {
+    if (await isBackendAvailable()) {
+      return axios.post(`${API_BASE_URL}/users/${userId}/wishlist/${propertyId}`);
+    }
+    return mockPropertyAPI.addToWishlist(userId, propertyId);
+  },
+
+  removeFromWishlist: async (userId, propertyId) => {
+    if (await isBackendAvailable()) {
+      return axios.delete(`${API_BASE_URL}/users/${userId}/wishlist/${propertyId}`);
+    }
+    return mockPropertyAPI.removeFromWishlist(userId, propertyId);
+  },
+
+  getUserWishlist: async (userId) => {
+    if (await isBackendAvailable()) {
+      return axios.get(`${API_BASE_URL}/users/${userId}/wishlist`);
+    }
+    return mockPropertyAPI.getUserWishlist(userId);
   }
 };
 

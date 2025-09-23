@@ -1,14 +1,31 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Bed, Bath, Square, Heart, Trash2 } from 'lucide-react';
+import { MapPin, Bed, Bath, Square, Heart, Trash2, Star } from 'lucide-react';
 import { formatPrice } from '../utils';
 import { Card, CardContent } from './ui/Card';
 import { useAuth } from '../contexts/AuthContext';
 import { propertyAPI } from '../services/api';
+import ConfirmationDialog from './ui/ConfirmationDialog';
 
-const PropertyCard = ({ property, onFavoriteToggle, isFavorite = false, onDelete }) => {
+const PropertyCard = ({
+  property,
+  onFavoriteToggle,
+  isFavorite = false,
+  onDelete,
+  showRemoveFromFavorites = false,
+  onRemoveFromFavorites,
+  onWishlistToggle,
+  isWishlisted = false,
+  showRemoveFromWishlist = false,
+  onRemoveFromWishlist
+}) => {
   const { user } = useAuth();
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showRemoveFavoriteDialog, setShowRemoveFavoriteDialog] = useState(false);
+  const [showRemoveWishlistDialog, setShowRemoveWishlistDialog] = useState(false);
 
   const {
     _id,
@@ -27,17 +44,37 @@ const PropertyCard = ({ property, onFavoriteToggle, isFavorite = false, onDelete
 
   const isOwner = user && owner === user._id;
 
-  const handleDelete = async (e) => {
+  const handleFavoriteToggle = async (e) => {
     e.preventDefault();
     e.stopPropagation();
 
+    if (!user) return;
+
+    try {
+      setFavoriteLoading(true);
+      if (isFavorite) {
+        // Remove from favorites
+        await propertyAPI.removeFromFavorites(user._id, _id);
+        if (onFavoriteToggle) {
+          onFavoriteToggle(_id, false);
+        }
+      } else {
+        // Add to favorites
+        await propertyAPI.addToFavorites(user._id, _id);
+        if (onFavoriteToggle) {
+          onFavoriteToggle(_id, true);
+        }
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      alert('Failed to update favorites. Please try again.');
+    } finally {
+      setFavoriteLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
     if (!isOwner) return;
-
-    const confirmed = window.confirm(
-      `Are you sure you want to delete "${title}"? This action cannot be undone.`
-    );
-
-    if (!confirmed) return;
 
     try {
       setDeleteLoading(true);
@@ -45,11 +82,77 @@ const PropertyCard = ({ property, onFavoriteToggle, isFavorite = false, onDelete
       if (onDelete) {
         onDelete(_id);
       }
+      setShowDeleteDialog(false);
     } catch (error) {
       console.error('Error deleting property:', error);
       alert('Failed to delete property. Please try again.');
     } finally {
       setDeleteLoading(false);
+    }
+  };
+
+  const handleRemoveFromFavorites = async () => {
+    if (!user) return;
+
+    try {
+      setFavoriteLoading(true);
+      await propertyAPI.removeFromFavorites(user._id, _id);
+      if (onRemoveFromFavorites) {
+        onRemoveFromFavorites(_id);
+      }
+      setShowRemoveFavoriteDialog(false);
+    } catch (error) {
+      console.error('Error removing from favorites:', error);
+      alert('Failed to remove from favorites. Please try again.');
+    } finally {
+      setFavoriteLoading(false);
+    }
+  };
+
+  const handleWishlistToggle = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!user) return;
+
+    try {
+      setWishlistLoading(true);
+      if (isWishlisted) {
+        // Remove from wishlist
+        await propertyAPI.removeFromWishlist(user._id, _id);
+        if (onWishlistToggle) {
+          onWishlistToggle(_id, false);
+        }
+      } else {
+        // Add to wishlist
+        await propertyAPI.addToWishlist(user._id, _id);
+        if (onWishlistToggle) {
+          onWishlistToggle(_id, true);
+        }
+      }
+    } catch (error) {
+      console.error('Error toggling wishlist:', error);
+      alert('Failed to update wishlist. Please try again.');
+    } finally {
+      setWishlistLoading(false);
+    }
+  };
+
+  const handleRemoveFromWishlist = async () => {
+    if (!user) return;
+
+    try {
+      setWishlistLoading(true);
+      await propertyAPI.removeFromWishlist(user._id, _id);
+      if (onRemoveFromWishlist) {
+        onRemoveFromWishlist(_id);
+      }
+      setShowRemoveWishlistDialog(false);
+    } catch (error) {
+      console.error('Error removing from wishlist:', error);
+      alert('Failed to remove from wishlist. Please try again.');
+    } finally {
+      setWishlistLoading(false);
     }
   };
 
@@ -65,19 +168,49 @@ const PropertyCard = ({ property, onFavoriteToggle, isFavorite = false, onDelete
         </Link>
         <div className="absolute top-3 right-3 flex gap-2">
           <button
-            onClick={() => onFavoriteToggle && onFavoriteToggle(_id)}
-            className="p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow"
+            onClick={handleFavoriteToggle}
+            disabled={favoriteLoading}
+            className="p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Heart
               className={`w-5 h-5 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'}`}
             />
           </button>
+          <button
+            onClick={handleWishlistToggle}
+            disabled={wishlistLoading}
+            className="p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Star
+              className={`w-5 h-5 ${isWishlisted ? 'fill-yellow-500 text-yellow-500' : 'text-gray-600'}`}
+            />
+          </button>
           {isOwner && (
             <button
-              onClick={handleDelete}
+              onClick={() => setShowDeleteDialog(true)}
               disabled={deleteLoading}
               className="p-2 bg-red-600 text-white rounded-full shadow-md hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               title="Delete Property"
+            >
+              <Trash2 className="w-5 h-5" />
+            </button>
+          )}
+          {showRemoveFromFavorites && (
+            <button
+              onClick={() => setShowRemoveFavoriteDialog(true)}
+              disabled={favoriteLoading}
+              className="p-2 bg-orange-600 text-white rounded-full shadow-md hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Remove from Favorites"
+            >
+              <Trash2 className="w-5 h-5" />
+            </button>
+          )}
+          {showRemoveFromWishlist && (
+            <button
+              onClick={() => setShowRemoveWishlistDialog(true)}
+              disabled={wishlistLoading}
+              className="p-2 bg-purple-600 text-white rounded-full shadow-md hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Remove from Wishlist"
             >
               <Trash2 className="w-5 h-5" />
             </button>
@@ -141,6 +274,42 @@ const PropertyCard = ({ property, onFavoriteToggle, isFavorite = false, onDelete
           </button>
         </div>
       </CardContent>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmationDialog
+        isOpen={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+        onConfirm={handleDelete}
+        title="Delete Property"
+        message={`Are you sure you want to delete "${title}"? This action cannot be undone.`}
+        confirmText="Delete"
+        variant="danger"
+        isLoading={deleteLoading}
+      />
+
+      {/* Remove from Favorites Confirmation Dialog */}
+      <ConfirmationDialog
+        isOpen={showRemoveFavoriteDialog}
+        onClose={() => setShowRemoveFavoriteDialog(false)}
+        onConfirm={handleRemoveFromFavorites}
+        title="Remove from Favorites"
+        message={`Are you sure you want to remove "${title}" from your favorites?`}
+        confirmText="Remove"
+        variant="warning"
+        isLoading={favoriteLoading}
+      />
+
+      {/* Remove from Wishlist Confirmation Dialog */}
+      <ConfirmationDialog
+        isOpen={showRemoveWishlistDialog}
+        onClose={() => setShowRemoveWishlistDialog(false)}
+        onConfirm={handleRemoveFromWishlist}
+        title="Remove from Wishlist"
+        message={`Are you sure you want to remove "${title}" from your wishlist?`}
+        confirmText="Remove"
+        variant="warning"
+        isLoading={wishlistLoading}
+      />
     </Card>
   );
 };

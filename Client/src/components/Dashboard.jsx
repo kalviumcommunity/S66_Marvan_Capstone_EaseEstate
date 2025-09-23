@@ -10,18 +10,27 @@ import {
   Eye,
   TrendingUp,
   DollarSign,
-  Building
+  Building,
+  Heart,
+  Star,
+  Bookmark
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { propertyAPI } from '../services/api';
 import { formatPrice, formatDate } from '../utils';
 import Button from './ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/Card';
+import PropertyCard from './PropertyCard';
+import ConfirmationDialog from './ui/ConfirmationDialog';
 
 const Dashboard = () => {
   const { user } = useAuth();
   const [properties, setProperties] = useState([]);
+  const [favorites, setFavorites] = useState([]);
+  const [wishlist, setWishlist] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [favoritesLoading, setFavoritesLoading] = useState(true);
+  const [wishlistLoading, setWishlistLoading] = useState(true);
   const [error, setError] = useState('');
 
   const fetchUserProperties = useCallback(async () => {
@@ -43,9 +52,41 @@ const Dashboard = () => {
     }
   }, [user?.id]);
 
+  const fetchUserFavorites = useCallback(async () => {
+    if (!user?.id) return;
+
+    try {
+      setFavoritesLoading(true);
+      const response = await propertyAPI.getUserFavorites(user.id);
+      setFavorites(response.data);
+    } catch (err) {
+      console.error('Error fetching user favorites:', err);
+      setFavorites([]);
+    } finally {
+      setFavoritesLoading(false);
+    }
+  }, [user?.id]);
+
+  const fetchUserWishlist = useCallback(async () => {
+    if (!user?.id) return;
+
+    try {
+      setWishlistLoading(true);
+      const response = await propertyAPI.getUserWishlist(user.id);
+      setWishlist(response.data);
+    } catch (err) {
+      console.error('Error fetching user wishlist:', err);
+      setWishlist([]);
+    } finally {
+      setWishlistLoading(false);
+    }
+  }, [user?.id]);
+
   useEffect(() => {
     fetchUserProperties();
-  }, [fetchUserProperties]);
+    fetchUserFavorites();
+    fetchUserWishlist();
+  }, [fetchUserProperties, fetchUserFavorites, fetchUserWishlist]);
 
   const handleDeleteProperty = async (propertyId) => {
     if (window.confirm('Are you sure you want to delete this property?')) {
@@ -56,6 +97,60 @@ const Dashboard = () => {
         setError('Failed to delete property. Please try again.');
         console.error('Error deleting property:', err);
       }
+    }
+  };
+
+  const handleRemoveFromFavorites = async (propertyId) => {
+    try {
+      await propertyAPI.removeFromFavorites(user.id, propertyId);
+      setFavorites(favorites.filter(p => p._id !== propertyId));
+    } catch (err) {
+      setError('Failed to remove from favorites. Please try again.');
+      console.error('Error removing from favorites:', err);
+    }
+  };
+
+  const handleRemoveFromWishlist = async (propertyId) => {
+    try {
+      await propertyAPI.removeFromWishlist(user.id, propertyId);
+      setWishlist(wishlist.filter(p => p._id !== propertyId));
+    } catch (err) {
+      setError('Failed to remove from wishlist. Please try again.');
+      console.error('Error removing from wishlist:', err);
+    }
+  };
+
+  const handleFavoriteToggle = async (propertyId, isFavorite) => {
+    if (isFavorite) {
+      // Add to favorites
+      try {
+        await propertyAPI.addToFavorites(user.id, propertyId);
+        // Refresh favorites list
+        fetchUserFavorites();
+      } catch (err) {
+        setError('Failed to add to favorites. Please try again.');
+        console.error('Error adding to favorites:', err);
+      }
+    } else {
+      // Remove from favorites
+      await handleRemoveFromFavorites(propertyId);
+    }
+  };
+
+  const handleWishlistToggle = async (propertyId, isWishlisted) => {
+    if (isWishlisted) {
+      // Add to wishlist
+      try {
+        await propertyAPI.addToWishlist(user.id, propertyId);
+        // Refresh wishlist list
+        fetchUserWishlist();
+      } catch (err) {
+        setError('Failed to add to wishlist. Please try again.');
+        console.error('Error adding to wishlist:', err);
+      }
+    } else {
+      // Remove from wishlist
+      await handleRemoveFromWishlist(propertyId);
     }
   };
 
@@ -241,6 +336,100 @@ const Dashboard = () => {
                       </div>
                     </div>
                   </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Favorites Section */}
+        <Card className="mt-8">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Heart className="w-5 h-5 mr-2 text-red-500" />
+              Favorite Properties
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {favoritesLoading ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto mb-4"></div>
+                <p className="text-gray-600">Loading favorites...</p>
+              </div>
+            ) : favorites.length === 0 ? (
+              <div className="text-center py-12">
+                <Star className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  No favorite properties yet
+                </h3>
+                <p className="text-gray-600 mb-6">
+                  Start exploring properties and add them to your favorites
+                </p>
+                <Link to="/properties">
+                  <Button variant="outline">
+                    <Eye className="w-4 h-4 mr-2" />
+                    Browse Properties
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {favorites.map((property) => (
+                  <PropertyCard
+                    key={property._id}
+                    property={property}
+                    isFavorite={true}
+                    showRemoveFromFavorites={true}
+                    onRemoveFromFavorites={handleRemoveFromFavorites}
+                    onFavoriteToggle={handleFavoriteToggle}
+                  />
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Wishlist Section */}
+        <Card className="mt-8">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Bookmark className="w-5 h-5 mr-2 text-purple-500" />
+              Wishlist Properties
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {wishlistLoading ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-4"></div>
+                <p className="text-gray-600">Loading wishlist...</p>
+              </div>
+            ) : wishlist.length === 0 ? (
+              <div className="text-center py-12">
+                <Star className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  No wishlist properties yet
+                </h3>
+                <p className="text-gray-600 mb-6">
+                  Add properties to your wishlist to keep track of ones you're interested in
+                </p>
+                <Link to="/properties">
+                  <Button variant="outline">
+                    <Eye className="w-4 h-4 mr-2" />
+                    Browse Properties
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {wishlist.map((property) => (
+                  <PropertyCard
+                    key={property._id}
+                    property={property}
+                    isWishlisted={true}
+                    showRemoveFromWishlist={true}
+                    onRemoveFromWishlist={handleRemoveFromWishlist}
+                    onWishlistToggle={handleWishlistToggle}
+                  />
                 ))}
               </div>
             )}

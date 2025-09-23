@@ -51,6 +51,127 @@ const getAllUsers = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
-  
 
-module.exports = {registerUser, loginUser, getAllUsers};
+// Add property to user's favorites
+const addToFavorites = async (req, res) => {
+    try {
+        const { userId, propertyId } = req.params;
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        // Check if property is already in favorites
+        if (user.favorites.includes(propertyId)) {
+            return res.status(400).json({ error: "Property already in favorites" });
+        }
+
+        user.favorites.push(propertyId);
+        await user.save();
+
+        const updatedUser = await User.findById(userId).populate('favorites');
+        res.json(updatedUser);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+// Remove property from user's favorites
+const removeFromFavorites = async (req, res) => {
+    try {
+        const { userId, propertyId } = req.params;
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        user.favorites = user.favorites.filter(fav => fav.toString() !== propertyId);
+        await user.save();
+
+        const updatedUser = await User.findById(userId).populate('favorites');
+        res.json(updatedUser);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+// Get user's favorites
+const getUserFavorites = async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        const user = await User.findById(userId).populate('favorites');
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        res.json(user.favorites);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+// Add property to user's wishlist
+const addToWishlist = async (req, res) => {
+    try {
+        const { userId, propertyId } = req.params;
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        // Check if property is already in wishlist
+        if (user.wishlist.includes(propertyId)) {
+            return res.status(400).json({ error: "Property already in wishlist" });
+        }
+
+        user.wishlist.push(propertyId);
+        await user.save();
+
+        const updatedUser = await User.findById(userId).populate('wishlist');
+        res.json(updatedUser);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+// Remove property from user's wishlist
+const removeFromWishlist = async (req, res) => {
+    try {
+        const { userId, propertyId } = req.params;
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        user.wishlist = user.wishlist.filter(item => item.toString() !== propertyId);
+        await user.save();
+
+        const updatedUser = await User.findById(userId).populate('wishlist');
+        res.json(updatedUser);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+// Get user's wishlist
+const getUserWishlist = async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        const user = await User.findById(userId).populate('wishlist');
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        res.json(user.wishlist);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+module.exports = {registerUser, loginUser, getAllUsers, addToFavorites, removeFromFavorites, getUserFavorites, addToWishlist, removeFromWishlist, getUserWishlist};

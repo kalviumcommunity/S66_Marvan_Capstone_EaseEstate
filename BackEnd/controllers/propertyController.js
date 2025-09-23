@@ -31,7 +31,7 @@ const addProperty = async (req, res) => {
     const saved = await newProperty.save();
 
     await User.findByIdAndUpdate(req.params.id, {
-      $push: { ownedResidencies:saved.title}
+      $push: { ownedResidencies: saved._id }
     });
 
     const userWithProperties = await User.findById(req.params.id).populate({

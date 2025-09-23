@@ -2,11 +2,13 @@ import React, { useState, useEffect, useImperativeHandle, forwardRef } from 'rea
 import { useSearchParams } from 'react-router-dom';
 import { Search, Filter, MapPin, SlidersHorizontal } from 'lucide-react';
 import { propertyAPI } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 import PropertyCard from './PropertyCard';
 import Button from './ui/Button';
 import Input from './ui/Input';
 
 const PropertyList = forwardRef((props, ref) => {
+  const { user } = useAuth();
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -19,10 +21,14 @@ const PropertyList = forwardRef((props, ref) => {
     bedrooms: '',
   });
   const [showFilters, setShowFilters] = useState(false);
+  const [userFavorites, setUserFavorites] = useState([]);
+  const [userWishlist, setUserWishlist] = useState([]);
 
   useEffect(() => {
     fetchProperties();
-  }, []);
+    fetchUserFavorites();
+    fetchUserWishlist();
+  }, [user?.id]);
 
   const fetchProperties = async () => {
     try {
@@ -34,6 +40,30 @@ const PropertyList = forwardRef((props, ref) => {
       console.error('Error fetching properties:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchUserFavorites = async () => {
+    if (!user?.id) return;
+
+    try {
+      const response = await propertyAPI.getUserFavorites(user.id);
+      setUserFavorites(response.data.map(fav => fav._id));
+    } catch (err) {
+      console.error('Error fetching user favorites:', err);
+      setUserFavorites([]);
+    }
+  };
+
+  const fetchUserWishlist = async () => {
+    if (!user?.id) return;
+
+    try {
+      const response = await propertyAPI.getUserWishlist(user.id);
+      setUserWishlist(response.data.map(item => item._id));
+    } catch (err) {
+      console.error('Error fetching user wishlist:', err);
+      setUserWishlist([]);
     }
   };
 
@@ -53,6 +83,46 @@ const PropertyList = forwardRef((props, ref) => {
 
   const handlePropertyDelete = (deletedPropertyId) => {
     setProperties(prev => prev.filter(property => property._id !== deletedPropertyId));
+  };
+
+  const handleFavoriteToggle = async (propertyId, isFavorite) => {
+    if (!user?.id) return;
+
+    try {
+      if (isFavorite) {
+        // Remove from favorites
+        await propertyAPI.removeFromFavorites(user.id, propertyId);
+        setUserFavorites(prev => prev.filter(id => id !== propertyId));
+      } else {
+        // Add to favorites
+        await propertyAPI.addToFavorites(user.id, propertyId);
+        setUserFavorites(prev => [...prev, propertyId]);
+      }
+    } catch (err) {
+      console.error('Error toggling favorite:', err);
+      // Refresh favorites to ensure consistency
+      fetchUserFavorites();
+    }
+  };
+
+  const handleWishlistToggle = async (propertyId, isWishlisted) => {
+    if (!user?.id) return;
+
+    try {
+      if (isWishlisted) {
+        // Remove from wishlist
+        await propertyAPI.removeFromWishlist(user.id, propertyId);
+        setUserWishlist(prev => prev.filter(id => id !== propertyId));
+      } else {
+        // Add to wishlist
+        await propertyAPI.addToWishlist(user.id, propertyId);
+        setUserWishlist(prev => [...prev, propertyId]);
+      }
+    } catch (err) {
+      console.error('Error toggling wishlist:', err);
+      // Refresh wishlist to ensure consistency
+      fetchUserWishlist();
+    }
   };
 
   const filteredProperties = properties.filter(property => {
@@ -202,6 +272,10 @@ const PropertyList = forwardRef((props, ref) => {
                 key={property._id}
                 property={property}
                 onDelete={handlePropertyDelete}
+                isFavorite={userFavorites.includes(property._id)}
+                onFavoriteToggle={handleFavoriteToggle}
+                isWishlisted={userWishlist.includes(property._id)}
+                onWishlistToggle={handleWishlistToggle}
               />
             ))}
           </div>

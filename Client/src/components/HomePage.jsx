@@ -61,7 +61,7 @@ const HomePage = () => {
                   </Button>
                 </Link>
                 <Link to="/signup">
-                  <Button variant="outline" size="lg" className="w-full sm:w-auto border-white text-white hover:bg-white hover:text-blue-600 bg-transparent shadow-lg">
+                  <Button variant="outline" size="lg" className="w-full sm:w-auto border-white text-blue hover:bg-white hover:text-blue-600 bg-transparent shadow-lg">
                     List Your Property
                   </Button>
                 </Link>
@@ -143,13 +143,13 @@ const HomePage = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/properties">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-blue-600 bg-transparent">
+              <Button size="lg" variant="outline" className="border-white text-blue hover:bg-white hover:text-blue-600 bg-transparent">
                 Start Your Search
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </Link>
             <Link to="/signup">
-              <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 shadow-lg">
+              <Button size="lg"  className="bg-white text-black border border-blue-600 shadow-lg hover:bg-blue-600 hover:text-white hover:border-white transition-colors duration-300">
                 Create Account
               </Button>
             </Link>

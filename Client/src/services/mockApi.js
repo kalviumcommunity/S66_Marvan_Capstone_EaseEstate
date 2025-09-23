@@ -4,7 +4,9 @@ const mockUsers = [
     _id: '1',
     name: 'John Doe',
     email: 'john@example.com',
-    password: 'password123'
+    password: 'password123',
+    favorites: [], // Array to store favorite property IDs
+    wishlist: [] // Array to store wishlist property IDs
   }
 ];
 
@@ -155,5 +157,79 @@ export const mockPropertyAPI = {
     await delay(500);
     const userProperties = mockProperties.filter(p => p.owner === userId);
     return { data: userProperties };
+  },
+
+  addToFavorites: async (userId, propertyId) => {
+    await delay(500);
+    const user = mockUsers.find(u => u._id === userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    if (user.favorites.includes(propertyId)) {
+      throw new Error('Property already in favorites');
+    }
+    user.favorites.push(propertyId);
+    const updatedUser = { ...user };
+    return { data: updatedUser };
+  },
+
+  removeFromFavorites: async (userId, propertyId) => {
+    await delay(500);
+    const user = mockUsers.find(u => u._id === userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    user.favorites = user.favorites.filter(fav => fav !== propertyId);
+    const updatedUser = { ...user };
+    return { data: updatedUser };
+  },
+
+  getUserFavorites: async (userId) => {
+    await delay(500);
+    const user = mockUsers.find(u => u._id === userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    const favoriteProperties = mockProperties.filter(property =>
+      user.favorites.includes(property._id)
+    );
+    return { data: favoriteProperties };
+  },
+
+  addToWishlist: async (userId, propertyId) => {
+    await delay(500);
+    const user = mockUsers.find(u => u._id === userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    if (user.wishlist.includes(propertyId)) {
+      throw new Error('Property already in wishlist');
+    }
+    user.wishlist.push(propertyId);
+    const updatedUser = { ...user };
+    return { data: updatedUser };
+  },
+
+  removeFromWishlist: async (userId, propertyId) => {
+    await delay(500);
+    const user = mockUsers.find(u => u._id === userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    user.wishlist = user.wishlist.filter(item => item !== propertyId);
+    const updatedUser = { ...user };
+    return { data: updatedUser };
+  },
+
+  getUserWishlist: async (userId) => {
+    await delay(500);
+    const user = mockUsers.find(u => u._id === userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    const wishlistProperties = mockProperties.filter(property =>
+      user.wishlist.includes(property._id)
+    );
+    return { data: wishlistProperties };
   }
 };
